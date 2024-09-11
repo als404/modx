@@ -1,0 +1,40 @@
+<?php
+$res = [];
+$id = $modx->getOption('itemID', $scriptProperties, '');
+$page = $modx->getObject('modResource', $id);
+$arr_tv_value = json_decode($page->getTVValue('video_gal'));
+
+function getTrumbnailRutube($id, $img = ''){
+    $url = 'https://rutube.ru/api/video/'.$id.'/';
+    $json = file_get_contents($url);
+    $obj = json_decode($json);
+    $result = ($img == '') ? $obj->thumbnail_url : '/assets/images/video/'.$img;
+    return $result;
+}
+
+function getTrumbnailYoutube($id, $img = ''){
+    $result = ($img == '') ? 'https://img.youtube.com/vi/'.$id.'/maxresdefault.jpg' : '/assets/images/video/'.$img;
+    return $result;
+}
+
+foreach($arr_tv_value as $v) {
+    $link = parse_url(trim($v->link));
+    $host = $link['host'];
+    
+    if($host == 'rutube.ru') {
+        $path = explode( '/', $link['path']);
+        $v_id = $path[3];
+        $res['id'][] = $v_id;
+        $res['link'][] = 'https://rutube.ru/play/embed/'.$v_id.'/';
+        $res['preview'][] = getTrumbnailRutube($v_id, $v->image);
+        
+    } else if ($host == 'youtu.be') {
+        $path = explode( '/', $link['path']);
+        $v_id = $path[1];
+        $res['id'][] = $v_id;
+        $res['link'][] = 'https://youtube.com/watch?v='.$v_id;
+        $res['preview'][] = getTrumbnailYoutube($v_id, $v->image);
+    }
+    
+}
+return $res;
