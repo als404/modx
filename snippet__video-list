@@ -17,24 +17,26 @@ function getTrumbnailYoutube($id, $img = ''){
     return $result;
 }
 
+function getVideoId($link) {
+    $path = explode( '/', trim($link, '/'));
+    return end($path);
+}
+
 foreach($arr_tv_value as $v) {
     $link = parse_url(trim($v->link));
     $host = $link['host'];
-
     if($host == 'rutube.ru') {
-        $path = explode( '/', $link['path']);
-        $v_id = $path[3];
+        $v_id = getVideoId($link['path']);
         $res['id'][] = $v_id;
         $res['link'][] = 'https://rutube.ru/play/embed/'.$v_id.'/';
         $res['preview'][] = getTrumbnailRutube($v_id, $v->image);
-
+        
     } else if ($host == 'youtu.be') {
-        $path = explode( '/', $link['path']);
-        $v_id = $path[1];
+        $v_id = getVideoId($link['path']);
         $res['id'][] = $v_id;
         $res['link'][] = 'https://youtube.com/watch?v='.$v_id;
         $res['preview'][] = getTrumbnailYoutube($v_id, $v->image);
     }
-
+    
 }
 return $res;
