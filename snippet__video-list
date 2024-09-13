@@ -1,9 +1,14 @@
 <?php
 $res = [];
+// получаем ID страницы
 $id = $modx->getOption('itemID', $scriptProperties, '');
+// получаем данные страницы
 $page = $modx->getObject('modResource', $id);
+// получаем значения TV поля video_gal lkz данной страницы
 $arr_tv_value = json_decode($page->getTVValue('video_gal'));
 
+// функция возвращает строку с URL на превью для видеоролика Rutube
+// если пользователь дбавил превью вручную, возвращаем URI этой превью
 function getTrumbnailRutube($id, $img = ''){
     $url = 'https://rutube.ru/api/video/'.$id.'/';
     $json = file_get_contents($url);
@@ -12,16 +17,21 @@ function getTrumbnailRutube($id, $img = ''){
     return $result;
 }
 
+// функция возвращает строку с URL на превью для видеоролика Youtube
+// если пользователь дбавил превью вручную, возвращаем URI этой превью
 function getTrumbnailYoutube($id, $img = ''){
     $result = ($img == '') ? 'https://img.youtube.com/vi/'.$id.'/maxresdefault.jpg' : '/assets/images/video/'.$img;
     return $result;
 }
 
+// функция возвращает строку с ID видеоролика
 function getVideoId($link) {
     $path = explode( '/', trim($link, '/'));
-    return end($path);
+    $result = end($path)
+    return $result;
 }
 
+// проходимся по массиву TV полей и подготавливаем массив с ID, Link, Preview
 foreach($arr_tv_value as $v) {
     $link = parse_url(trim($v->link));
     $host = $link['host'];
@@ -39,4 +49,49 @@ foreach($arr_tv_value as $v) {
     }
     
 }
+// возвращаем результат
 return $res;
+
+// Пример вывода превью в шаблоне
+// вызываем сниппет 
+// {set $video_list = 'video_list' | snippet : ['itemID' => $id]}
+// {if $video_list != ''} 
+// ...code...
+//   {foreach $video_list.preview as $item index=$index}
+//     {set $link =  parse_url(trim($item))}
+//     {set $host = $link['host']}
+//
+//     {if $index == 0}
+// ...code...
+//       {if is_null($host)}
+//         <img src="{'phpthumbon' | snippet : ['input' => ''~$item~'', 'options' => 'w=860&h=484&zc=1']}" alt="{$_modx->resource.pagetitle} видео" >
+//       {else}
+//         <img src="{$item}" alt="{$_modx->resource.pagetitle} видео" data-test="{$item}">
+//       {/if}
+// ...code...
+//     {else}
+//       {if $index == 1}
+// ...code...
+//       {/if}
+// ...code...
+//       {if is_null($host)}
+//         <img src="{'phpthumbon' | snippet : ['input' => ''~$item~'', 'options' => 'w=300&h=169&zc=1']}" alt="{$_modx->resource.pagetitle} видео" data-test="{$item}">
+//       {else}
+//         <img src="{$item}" alt="{$_modx->resource.pagetitle} видео">
+//       {/if}
+// ...code...
+//       {if $video@last}</div>{/if}
+//     {/if}
+//   {/foreach}
+// ...code...
+// {/if}
+//
+// Для вывода видеоролик(и) через плагин Fotorama добавляем массив с ссылкой(ми) на видеоролик(и)
+// {set $vl = 'video_list' | snippet : ['itemID' => $id]}
+// <script>
+// const galArray = [
+//   {foreach $vl['link'] as $video}        
+//     {ignore} { {/ignore}video: '{$video}' {ignore} } {/ignore}{if !$file@last},{else}{/if}                    
+//   {/foreach}
+// ];
+// </script>
