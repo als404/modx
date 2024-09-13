@@ -27,7 +27,7 @@ function getTrumbnailYoutube($id, $img = ''){
 // функция возвращает строку с ID видеоролика
 function getVideoId($link) {
     $path = explode( '/', trim($link, '/'));
-    $result = end($path)
+    $result = end($path);
     return $result;
 }
 
