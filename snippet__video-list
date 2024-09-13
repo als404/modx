@@ -4,7 +4,7 @@ $res = [];
 $id = $modx->getOption('itemID', $scriptProperties, '');
 // получаем данные страницы
 $page = $modx->getObject('modResource', $id);
-// получаем значения TV поля video_gal lkz данной страницы
+// получаем значения TV поля video_gal для данной страницы
 $arr_tv_value = json_decode($page->getTVValue('video_gal'));
 
 // функция возвращает строку с URL на превью для видеоролика Rutube
